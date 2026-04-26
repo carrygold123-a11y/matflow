@@ -1,0 +1,7 @@
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'bauleiter';
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'polier';
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'vorarbeiter';
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'disponent';
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'lagerist';
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'fahrer';
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'subcontractor';

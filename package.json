@@ -1,0 +1,23 @@
+{
+  "name": "matflow",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "backend/api",
+    "backend/database",
+    "backend/modules",
+    "shared/types",
+    "shared/utils"
+  ],
+  "scripts": {
+    "postinstall": "npm run generate --workspace @matflow/database && npm run generate --workspace @matflow/backend-modules",
+    "build": "npm run build --workspace @matflow/shared-types && npm run build --workspace @matflow/shared-utils && npm run build --workspace @matflow/backend-modules && npm run build --workspace @matflow/api && npm run build --workspace @matflow/web",
+    "test": "npm run test --workspace @matflow/api && npm run test --workspace @matflow/web",
+    "db:generate": "npm run generate --workspace @matflow/database",
+    "db:migrate": "npm run migrate:deploy --workspace @matflow/database",
+    "db:seed": "npm run seed --workspace @matflow/database",
+    "dev:api": "npm run start:dev --workspace @matflow/api",
+    "dev:web": "npm run dev --workspace @matflow/web"
+  }
+}

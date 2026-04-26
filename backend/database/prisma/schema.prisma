@@ -1,0 +1,315 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  worker
+  manager
+  admin
+  bauleiter
+  polier
+  vorarbeiter
+  disponent
+  lagerist
+  fahrer
+  subcontractor
+}
+
+enum SitePlanStatus {
+  draft
+  published
+}
+
+enum SitePlanShiftStatus {
+  not_ready
+  ready
+  active
+  blocked
+  complete
+}
+
+enum SitePlanPriority {
+  critical
+  focus
+  ready
+}
+
+enum SitePlanBriefingCategory {
+  operations
+  safety
+  logistics
+}
+
+enum SitePlanMaterialNeedStatus {
+  needed
+  ordered
+  ready
+  delivered
+}
+
+enum MaterialStatus {
+  available
+  reserved
+  picked_up
+}
+
+enum MaterialCondition {
+  new
+  good
+  used
+  damaged
+}
+
+enum TransportStatus {
+  planned
+  in_transit
+  delivered
+}
+
+model Site {
+  id                String             @id @default(cuid())
+  name              String
+  latitude          Float
+  longitude         Float
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  deletedAt         DateTime?
+  users             User[]
+  materials         Material[]
+  sitePlans         SitePlan[]
+  trucks            Truck[]
+  outboundTransfers TransportRequest[] @relation("FromSite")
+  inboundTransfers  TransportRequest[] @relation("ToSite")
+  driverNotesFrom   DriverNote[]       @relation("DriverNoteFrom")
+  driverNotesTo     DriverNote[]       @relation("DriverNoteTo")
+}
+
+model DriverNote {
+  id               String    @id @default(cuid())
+  licensePlate     String
+  vehicleType      String
+  driverName       String    @default("")
+  fromSiteId       String
+  toSiteId         String
+  signaturePath    String?
+  signedAt         DateTime?
+  deliveryNotePath String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  fromSite         Site      @relation("DriverNoteFrom", fields: [fromSiteId], references: [id])
+  toSite           Site      @relation("DriverNoteTo", fields: [toSiteId], references: [id])
+
+  @@index([licensePlate])
+  @@index([fromSiteId])
+  @@index([toSiteId])
+}
+
+model User {
+  id                String     @id @default(cuid())
+  name              String
+  email             String     @unique
+  passwordHash      String
+  role              UserRole
+  siteId            String
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  site              Site       @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  createdMaterials  Material[] @relation("CreatedBy")
+  reservedMaterials Material[] @relation("ReservedBy")
+  updatedSitePlans  SitePlan[] @relation("UpdatedBy")
+  ledSitePlanZones  SitePlanZone[] @relation("ZoneLead")
+  sitePlanAssignments SitePlanAssignment[]
+
+  @@index([siteId])
+}
+
+model Material {
+  id                String            @id @default(cuid())
+  title             String
+  description       String
+  category          String
+  quantity          Float
+  condition         MaterialCondition
+  imageUrl          String
+  latitude          Float
+  longitude         Float
+  siteId            String
+  status            MaterialStatus    @default(available)
+  suggestedCategory String?
+  createdById       String?
+  reservedById      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+  site              Site              @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  createdBy         User?             @relation("CreatedBy", fields: [createdById], references: [id])
+  reservedBy        User?             @relation("ReservedBy", fields: [reservedById], references: [id])
+  transportRequests TransportRequest[]
+  sitePlanZones     SitePlanZone[]    @relation("ZoneMaterial")
+  sitePlanMaterialNeeds SitePlanMaterialNeed[] @relation("NeedMaterial")
+
+  @@index([category])
+  @@index([status])
+  @@index([siteId])
+}
+
+model Truck {
+  id                String             @id @default(cuid())
+  name              String
+  licensePlate      String             @unique
+  siteId            String
+  available         Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  site              Site               @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  transportRequests TransportRequest[]
+  sitePlanZones     SitePlanZone[]     @relation("ZoneTruck")
+
+  @@index([siteId])
+  @@index([available])
+}
+
+model TransportRequest {
+  id                   String          @id @default(cuid())
+  materialId           String
+  fromSiteId           String
+  toSiteId             String
+  truckId              String
+  status               TransportStatus @default(planned)
+  driverName           String?
+  driverCompany        String?
+  driverAccessCodeHash String?
+  loadingQrToken       String?         @unique
+  unloadingQrToken     String?         @unique
+  loadedAt             DateTime?
+  unloadingScannedAt   DateTime?
+  loadingSignaturePath String?
+  loadingSignedBy      String?
+  loadingSignedAt      DateTime?
+  deliveryNotePath     String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  material             Material        @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  fromSite             Site            @relation("FromSite", fields: [fromSiteId], references: [id], onDelete: Restrict)
+  toSite               Site            @relation("ToSite", fields: [toSiteId], references: [id], onDelete: Restrict)
+  truck                Truck           @relation(fields: [truckId], references: [id], onDelete: Restrict)
+  sitePlanZones        SitePlanZone[]  @relation("ZoneTransport")
+
+  @@index([materialId])
+  @@index([status])
+  @@index([truckId])
+}
+
+model SitePlan {
+  id          String         @id @default(cuid())
+  siteId      String
+  planDate    DateTime       @db.Date
+  status      SitePlanStatus @default(draft)
+  shiftStatus SitePlanShiftStatus @default(ready)
+  briefing    String         @default("")
+  safetyNotes String         @default("")
+  updatedById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  site        Site           @relation(fields: [siteId], references: [id], onDelete: Restrict)
+  updatedBy   User?          @relation("UpdatedBy", fields: [updatedById], references: [id])
+  briefings   SitePlanBriefing[]
+  zones       SitePlanZone[]
+
+  @@unique([siteId, planDate])
+  @@index([planDate])
+  @@index([status])
+}
+
+model SitePlanZone {
+  id                String             @id @default(cuid())
+  planId            String
+  name              String
+  shiftLabel        String
+  focus             String
+  supportCategory   String
+  priority          SitePlanPriority
+  sortOrder         Int                @default(0)
+  leadUserId        String?
+  supportMaterialId String?
+  supportTruckId    String?
+  activeTransportId String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plan              SitePlan           @relation(fields: [planId], references: [id], onDelete: Cascade)
+  leadUser          User?              @relation("ZoneLead", fields: [leadUserId], references: [id])
+  supportMaterial   Material?          @relation("ZoneMaterial", fields: [supportMaterialId], references: [id])
+  supportTruck      Truck?             @relation("ZoneTruck", fields: [supportTruckId], references: [id])
+  activeTransport   TransportRequest?  @relation("ZoneTransport", fields: [activeTransportId], references: [id])
+  materialNeeds     SitePlanMaterialNeed[]
+  assignments       SitePlanAssignment[]
+
+  @@index([planId, sortOrder])
+  @@index([leadUserId])
+}
+
+model SitePlanBriefing {
+  id        String                   @id @default(cuid())
+  planId    String
+  category  SitePlanBriefingCategory
+  title     String
+  note      String
+  sortOrder Int                      @default(0)
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  plan      SitePlan                 @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, sortOrder])
+}
+
+model SitePlanMaterialNeed {
+  id        String                     @id @default(cuid())
+  zoneId    String
+  materialId String?
+  label     String
+  quantity  Float
+  unit      String
+  status    SitePlanMaterialNeedStatus @default(needed)
+  notes     String                     @default("")
+  sortOrder Int                        @default(0)
+  createdAt DateTime                   @default(now())
+  updatedAt DateTime                   @updatedAt
+  zone      SitePlanZone               @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  material  Material?                  @relation("NeedMaterial", fields: [materialId], references: [id], onDelete: SetNull)
+
+  @@index([zoneId, sortOrder])
+  @@index([materialId])
+}
+
+model SitePlanAssignment {
+  id        String       @id @default(cuid())
+  zoneId     String
+  userId     String
+  sortOrder  Int          @default(0)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  zone       SitePlanZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([zoneId, userId])
+  @@index([userId])
+  @@index([zoneId, sortOrder])
+}
+
+model NotificationEvent {
+  id         String   @id @default(cuid())
+  type       String
+  entityType String
+  entityId   String
+  message    String
+  payload    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

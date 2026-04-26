@@ -1,0 +1,11 @@
+DELETE FROM "SitePlanAssignment";
+DELETE FROM "SitePlanMaterialNeed";
+DELETE FROM "SitePlanZone";
+DELETE FROM "SitePlanBriefing";
+DELETE FROM "SitePlan";
+DELETE FROM "NotificationEvent";
+DELETE FROM "TransportRequest";
+DELETE FROM "Material";
+DELETE FROM "Truck";
+DELETE FROM "User";
+DELETE FROM "Site";

@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+storage
+uploads
+.git
+.gitignore
+apps/mobile/build
+apps/mobile/.dart_tool
