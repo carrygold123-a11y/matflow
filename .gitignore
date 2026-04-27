@@ -4,7 +4,7 @@ coverage/
 .env
 .env.local
 uploads/
-storage/
+/storage/
 apps/mobile/.dart_tool/
 apps/mobile/build/
 apps/mobile/.packages
