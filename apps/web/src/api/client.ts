@@ -1,9 +1,11 @@
 import type {
   AuthUser,
   CreateDriverNotePayload,
+  DriverLoadingScanPayload,
   DriverLoginPayload,
   DriverLoginResponse,
   DriverNoteItem,
+  DriverUnloadingScanPayload,
   LoginPayload,
   LoginResponse,
   MaterialFilters,
