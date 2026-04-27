@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = [
+  "npm run build --workspace @matflow/shared-types",
+  "npm run build --workspace @matflow/shared-utils",
+  "npm run build --workspace @matflow/web"
+]
+
+[start]
+cmd = "npx serve -s apps/web/dist -l $PORT"

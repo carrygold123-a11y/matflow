@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = [
+  "npm run generate --workspace @matflow/database",
+  "npm run generate --workspace @matflow/backend-modules",
+  "npm run build --workspace @matflow/shared-types",
+  "npm run build --workspace @matflow/shared-utils",
+  "npm run build --workspace @matflow/backend-modules",
+  "npm run build --workspace @matflow/api"
+]
+
+[start]
+cmd = "npm run migrate:deploy --workspace @matflow/database && node backend/api/dist/main.js"
