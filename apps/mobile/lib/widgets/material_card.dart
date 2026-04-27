@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/material_item.dart';
 
-const _apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:3000');
+const _apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'https://matflow-production.up.railway.app');
 
 class MaterialCard extends StatelessWidget {
   const MaterialCard({

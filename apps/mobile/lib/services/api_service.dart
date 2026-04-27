@@ -20,6 +20,7 @@ class ApiService {
         _baseUrls = _buildBaseUrls();
 
   final http.Client _client;
+  static const String _cloudFallbackBaseUrl = 'https://matflow-production.up.railway.app';
   static const String _configuredBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: '');
   final List<String> _baseUrls;
   String? _activeBaseUrl;
@@ -449,18 +450,32 @@ class ApiService {
 
   static List<String> _buildBaseUrls() {
     if (_configuredBaseUrl.isNotEmpty) {
-      return [_configuredBaseUrl];
+      return _uniqueUrls([_configuredBaseUrl, _cloudFallbackBaseUrl]);
     }
 
     if (kIsWeb) {
-      return ['http://localhost:3000'];
+      return _uniqueUrls([_cloudFallbackBaseUrl, 'http://localhost:3000']);
     }
 
     if (Platform.isAndroid) {
-      return ['http://10.0.2.2:3000', 'http://127.0.0.1:3000'];
+      return _uniqueUrls([_cloudFallbackBaseUrl, 'http://10.0.2.2:3000', 'http://127.0.0.1:3000']);
     }
 
-    return ['http://localhost:3000'];
+    return _uniqueUrls([_cloudFallbackBaseUrl, 'http://localhost:3000']);
+  }
+
+  static List<String> _uniqueUrls(List<String> urls) {
+    final seen = <String>{};
+    final result = <String>[];
+    for (final url in urls) {
+      final trimmed = url.trim();
+      if (trimmed.isEmpty || seen.contains(trimmed)) {
+        continue;
+      }
+      seen.add(trimmed);
+      result.add(trimmed);
+    }
+    return result;
   }
 
   List<String> _orderedBaseUrls() {
