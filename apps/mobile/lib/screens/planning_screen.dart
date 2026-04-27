@@ -78,6 +78,7 @@ class PlanningScreen extends StatefulWidget {
 }
 
 class _PlanningScreenState extends State<PlanningScreen> {
+  final ApiService _apiService = ApiService();
   DateTime _selectedDate = DateTime.now();
   _Tagesplan _plan = _Tagesplan.empty();
   bool _loading = false;
@@ -112,7 +113,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       final siteId = session.siteId;
-      final plan = await ApiService.instance.fetchSitePlan(
+      final plan = await _apiService.fetchSitePlan(
         session.token,
         planDate: _dateStr,
         siteId: siteId.isEmpty ? null : siteId,
@@ -131,7 +132,7 @@ class _PlanningScreenState extends State<PlanningScreen> {
     setState(() { _saving = true; _error = null; });
     try {
       final siteId = session.siteId;
-      await ApiService.instance.upsertSitePlan(
+      await _apiService.upsertSitePlan(
         session.token,
         planDate: _dateStr,
         status: 'published',
