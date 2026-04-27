@@ -1,0 +1,17 @@
+{
+  "name": "BauFlow",
+  "short_name": "BauFlow",
+  "description": "MatFlow Baustellen-, Material- und Transportsteuerung",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "256x256",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

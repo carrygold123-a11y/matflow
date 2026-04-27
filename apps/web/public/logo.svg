@@ -1,0 +1,10 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="46" fill="#191919"/>
+  <path d="M32 152 L32 54 L52 54 L52 70 L62 62 L76 54 L94 54 L94 152 Z" stroke="#F5BF18" stroke-width="8" stroke-linejoin="round" fill="none"/>
+  <path d="M98 152 L98 86 L108 74 L118 86 L118 152" stroke="#F5BF18" stroke-width="8" stroke-linejoin="round" fill="none"/>
+  <path d="M126 152 L126 108 L154 86 L182 108 L182 152 Z" stroke="white" stroke-width="8" stroke-linejoin="round" fill="none"/>
+  <text x="107" y="186" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="33" font-weight="900" letter-spacing="2" dominant-baseline="auto">
+    <tspan fill="white">BAU</tspan><tspan fill="#F5BF18">FLOW</tspan>
+  </text>
+  <rect x="96" y="198" width="64" height="5" rx="2.5" fill="#F5BF18"/>
+</svg>
